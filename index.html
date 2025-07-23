@@ -13,7 +13,112 @@
   <body>
     <h1 class="main-title">alpine js</h1>
     <div class="feature-box">
-      <h1 x-data="{ message: 'I ❤️ Alpine' }" x-text="message"></h1>
+      <div x-data="priceCalculator()" x-init="fetchData()">
+        <!-- Wybór rozmiaru -->
+        <label>Wielkość: <span x-text="size"></span></label>
+        <input
+          type="range"
+          min="1"
+          max="10"
+          step="1"
+          x-model="size"
+          class="w-full mb-4"
+        />
+
+        <!-- Wybór materiału -->
+        <div class="mb-4">
+          <p class="font-bold">Materiał:</p>
+          <template x-for="material in data.materials" :key="material.id">
+            <button
+              @click="selectedMaterial = material"
+              :class="selectedMaterial.id === material.id ? 'bg-blue-500 text-white' : 'bg-gray-200'"
+              class="px-3 py-1 rounded mr-2 mt-2"
+              x-text="material.name"
+            ></button>
+          </template>
+        </div>
+
+        <!-- Wybór wzoru -->
+        <label>Wzór: <span x-text="selectedPattern.name"></span></label>
+        <input
+          type="range"
+          min="0"
+          :max="data.patterns.length - 1"
+          step="1"
+          x-model="patternIndex"
+          class="w-full mb-4"
+        />
+
+        <!-- Wyliczenie -->
+        <div class="mt-4 p-4 border rounded shadow">
+          <p><strong>Rozmiar:</strong> <span x-text="size"></span></p>
+          <p>
+            <strong>Materiał:</strong>
+            <span x-text="selectedMaterial.name"></span>
+          </p>
+          <p>
+            <strong>Wzór:</strong> <span x-text="selectedPattern.name"></span>
+          </p>
+          <p class="text-xl mt-2">
+            <strong>Łączna cena: </strong>
+            <span x-text="totalPrice.toFixed(2)"></span> zł
+          </p>
+        </div>
+      </div>
     </div>
+    <div class="feature-box">
+      <div>
+        <h2 x-data="{ message: 'I ❤️ Alpine' }" x-text="message"></h2>
+      </div>
+      <div>
+        <div x-data="{ count: 3, count2: 0, sum: 0 }">
+          <button x-on:click="count++, count2--">Increment</button>
+
+          <p x-text="count"></p>
+          <p x-text="count2"></p>
+          <button x-on:click="count = 0; count2 = 0">Reset</button>
+          <button x-on:click="sum = count + count2">Calculate Sum</button>
+          <p x-text="sum"></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function priceCalculator() {
+        return {
+          data: {
+            sizes: { min: 1, max: 10, basePrice: 100 },
+            materials: [],
+            patterns: [],
+          },
+          size: 5,
+          selectedMaterial: { id: "", name: "", multiplier: 1 },
+          patternIndex: 0,
+
+          async fetchData() {
+            const res = await fetch("https://twojastrona.pl/pricing-data.json");
+            const json = await res.json();
+            this.data = json;
+            this.selectedMaterial = json.materials[0];
+          },
+
+          get selectedPattern() {
+            return (
+              this.data.patterns[this.patternIndex] || {
+                name: "",
+                multiplier: 1,
+              }
+            );
+          },
+
+          get totalPrice() {
+            const base = this.size * this.data.sizes.basePrice;
+            const materialFactor = this.selectedMaterial?.multiplier || 1;
+            const patternFactor = this.selectedPattern?.multiplier || 1;
+            return base * materialFactor * patternFactor;
+          },
+        };
+      }
+    </script>
   </body>
 </html>
