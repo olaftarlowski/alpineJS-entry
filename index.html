@@ -13,7 +13,31 @@
   <body>
     <h1 class="main-title">alpine js</h1>
     <div class="feature-box">
-      <div x-data="priceCalculator()" x-init="fetchData()">
+  <div x-data="volumeCalculator()" class="p-6 max-w-md mx-auto">
+    <h1 class="text-xl font-bold mb-4">Volume Calculator</h1>
+
+    <label class="block mb-2">
+      Length (m):
+      <input type="number" x-model.number="length" class="border p-1 w-full">
+    </label>
+
+    <label class="block mb-2">
+      Width (m):
+      <input type="number" x-model.number="width" class="border p-1 w-full">
+    </label>
+
+    <label class="block mb-4">
+      Depth (m):
+      <input type="number" x-model.number="height" class="border p-1 w-full">
+    </label>
+
+    <div class="font-semibold">
+      Objętość: <span x-text="volume + ' m³'"></span>
+    </div>
+  </div>
+    </div>
+    <div class="feature-box">
+      <div class="feature-box__calculator" x-data="priceCalculator()" x-init="fetchData()">
         <!-- Wybór rozmiaru -->
         <label>Wielkość: <span x-text="size"></span></label>
         <input
@@ -40,6 +64,7 @@
 
         <!-- Wybór wzoru -->
         <label>Wzór: <span x-text="selectedPattern.name"></span></label>
+        <br>
         <input
           type="range"
           min="0"
@@ -96,7 +121,7 @@
           patternIndex: 0,
 
           async fetchData() {
-            const res = await fetch("https://twojastrona.pl/pricing-data.json");
+            const res = await fetch("https://olaftarlowski.github.io/alpineJS-entry/calc-data.json");
             const json = await res.json();
             this.data = json;
             this.selectedMaterial = json.materials[0];
@@ -120,5 +145,17 @@
         };
       }
     </script>
+      <script>
+    function volumeCalculator() {
+      return {
+        length: 0,
+        width: 0,
+        height: 0,
+        get volume() {
+          return (this.length * this.width * this.height).toFixed(2);
+        }
+      }
+    }
+  </script>
   </body>
 </html>
